@@ -1,6 +1,0 @@
-make all --dry-run --keep-going --print-directory
-make: Entering directory '/Disk/src/KR_sol/KR_WordLinesCount'
-make: Leaving directory '/Disk/src/KR_sol/KR_WordLinesCount'
- 
-make: *** No rule to make target 'all'.
- 
