@@ -3,7 +3,7 @@
 set FILENAME=count
 set FILES=main.c tree.c
 
-set CFLAGS=-O3 -s -mconsole
+set CFLAGS=-O0 -s -mconsole
 set LKFLAGS=-Wl,--gc-sections
 
 @echo on
