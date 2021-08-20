@@ -9,6 +9,11 @@ typedef struct list_node {
         struct list_node *prev;
 } t_list;
 
-void    AddWord(t_list *first, char *word);
+/*Insert word in the end of list or
+* corellate it with existing node in list
+*/
+void    AddWord(t_list *node, char *word);
+
 void    list_print();
+
 t_list  *AllocNode();
