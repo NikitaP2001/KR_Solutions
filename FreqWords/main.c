@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include "tree.h"
+#include "list.h"
 
 int getword(char *, int);
 int isnoise(const char *word);
@@ -12,16 +12,13 @@ void ungetch(int);
 const char *noise_words[];
 
 int main(int argc, char *argv[]) {
-  struct tnode *root;
+  t_list *first;
   char word[MAXWORD];
 
-  if (argc > 1)
-    s_subword_len = atoi(argv[1]);
-
-  root = NULL;
+  first = AllocNode();
   while (getword(word, MAXWORD) != EOF)
     if (isalpha(word[0]) && !isnoise(word))
-      root = addtree(root, word);
+        AddWord(first, word);
   list_print();
   return 0;
 }
@@ -76,12 +73,12 @@ int getword(char *word, int lim){
       if ((*w = getch()) == '/')
         comment = 1;
       else ungetch(*w);
-	
+
 	if (comment || stringConst || controlLine) {
                 word[0] = '\0';
                 break;
 	}
-	
+
     if (!(isalnum(*w = getch()) || *w == '_')){
       ungetch(*w);
       break;
@@ -104,7 +101,7 @@ int getch(){
 }
 
 void ungetch(int sym){
-  if (buf == 0) 
+  if (buf == 0)
     buf = sym;
   else puts("Unable to ungetch\n");
 }
