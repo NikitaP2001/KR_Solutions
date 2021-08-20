@@ -19,7 +19,8 @@ int main(int argc, char *argv[]) {
   while (getword(word, MAXWORD) != EOF)
     if (isalpha(word[0]) && !isnoise(word))
         AddWord(first, word);
-  list_print();
+  list_print(first);
+
   return 0;
 }
 
@@ -113,6 +114,7 @@ const char *noise_words[] = {
         "then",
         "when",
         "is",
+        //etc...
 };
 
 int isnoise(const char *word)

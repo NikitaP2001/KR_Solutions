@@ -14,6 +14,6 @@ typedef struct list_node {
 */
 void    AddWord(t_list *node, char *word);
 
-void    list_print();
+void list_print(t_list *node_start);
 
 t_list  *AllocNode();
