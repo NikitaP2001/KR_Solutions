@@ -119,29 +119,26 @@ const char *noise_words[] = {
         "of",
         "to",
         "that",
+        "in"
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int isnoise(const char *word)
 {
         for (int i = 0; i < sizeof(noise_words) / sizeof(char *); i++)
         {
-                if (!strcmp(word, noise_words[i]))
+                if (!strcasecmp(word, noise_words[i]))
                         return 1;
         }
         return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
