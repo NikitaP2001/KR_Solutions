@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1629548160 source:e:\src\kr_solutions\freqwords\main.c
+	<stdio.h>
+	<ctype.h>
+	<string.h>
+	<stdlib.h>
+	"list.h"
+
+1629298572 e:\src\kr_solutions\freqwords\tree.h
+
+1629466667 source:e:\src\kr_solutions\freqwords\tree.c
+	"tree.h"
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+
+1629547727 e:\src\kr_solutions\freqwords\list.h
+
+1629547727 source:e:\src\kr_solutions\freqwords\list.c
+	<stdlib.h>
+	<string.h>
+	<stdio.h>
+	"list.h"
+
