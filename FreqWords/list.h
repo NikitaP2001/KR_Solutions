@@ -16,4 +16,6 @@ void    AddWord(t_list *node, char *word);
 
 void list_print(t_list *node_start);
 
+t_list *goto_start(t_list *node);
+
 t_list  *AllocNode();

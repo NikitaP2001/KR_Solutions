@@ -10,7 +10,7 @@ void node_cut(t_list *node);
 void AddWord(t_list *node, char *word) {
 
     /*Search word in list or insert in end*/
-    while (node->next != NULL && strcmp(word, node->word))
+    while (node->next != NULL && node->word != NULL && strcmp(word, node->word))
         node = node->next;
 
     if (node->next == NULL) {
@@ -35,6 +35,8 @@ void AddWord(t_list *node, char *word) {
         node_insert_before(temp, node);
     }
 
+    while (node->prev != NULL)
+        node = node->prev;
 }
 
 void list_print(t_list *node_start) {
@@ -67,6 +69,12 @@ void node_cut(t_list *node) {
 
     if (node->next != NULL)
         node->next->prev = node->prev;
+}
+
+t_list *goto_start(t_list *node) {
+    while (node->prev != NULL)
+        node = node->prev;
+    return node;
 }
 
 
