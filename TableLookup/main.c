@@ -15,6 +15,7 @@ static struct nlist *hashtab[HASHSIZE];
 unsigned hash(char *s);
 struct nlist *lookup(char *s);
 struct nlist *install(char *name, char *defn);
+void undef(char *name);
 
 int main()
 {
@@ -58,6 +59,23 @@ struct nlist *install(char *name, char *defn)
     if ((np->defn = strdup(defn)) == NULL)
         return NULL;
     return np;
+}
+
+void undef(char *name)
+{
+    struct nlist *np,*prev;
+    unsigned hashval;
+    if ((np = lookup(name)) != NULL) {
+        hashval = hash(name);
+        hashtab[hashval] = NULL;
+        while (np != NULL) {
+            prev = np;
+            np = np->next;
+            free((void *) prev->defn);
+            free((void *) prev->name);
+            free((void *) prev);
+        }
+    }
 }
 
 
