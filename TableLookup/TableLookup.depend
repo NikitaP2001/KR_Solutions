@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1630695327 source:e:\src\kr_solutions\tablelookup\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+
