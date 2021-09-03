@@ -12,6 +12,7 @@ struct nlist *lookup(char *s);
 struct nlist *install(char *name, char *defn);
 void undef(char *name);
 int define(char *line);
+void linelookup(char *line);
 
 char *nextword(char *line, char *word);
 int getline(char *line);
@@ -29,10 +30,22 @@ int main()
         char line[MAXLINE];
         while (getline(line) >= 0) {
                 if (line[0] == '#') {
-                        define(line);
-                        puts(line);
+                        int res = define(line);
+                        switch (res) {
+                        case 1:
+                                fputs("Incorrect macrodefinition name\n", stderr);
+                                break;
+                        case 2:
+                                fputs("No definition specified\n", stderr);
+                                break;
+                        case 3:
+                                fputs("Unknown macrodefinition\n", stderr);
+                                break;
+                        }
+                } else {
+                        linelookup(line);
                 }
-
+                puts(line);
         }
 }
 
@@ -44,6 +57,32 @@ int getline(char *line)
                 line[p++] = c;
         line[p] = '\0';
         return c;
+}
+
+void linelookup(char *line)
+{
+        char *lp = line;
+        char temp_line[MAXLINE];
+        char word[MAXWORD];
+        struct nlist *np;
+        temp_line[0] = '\0';
+
+        do {
+                while (*lp == ' ' && *lp != '\0') {
+                        lp++;
+                        strcat(temp_line, " ");
+                }
+                lp = nextword(lp, word);
+                if (isalpha(word[0]) || word[0] == '_') {
+                        if ((np = lookup(word)) != NULL)
+                                strcat(temp_line, np->defn);
+                        else
+                                strcat(temp_line, word);
+                } else
+                        strcat(temp_line, word);
+        } while (word[0] != '\0');
+
+        strcpy(line, temp_line);
 }
 
 char *nextword(char *line, char *word)
@@ -63,7 +102,7 @@ char *nextword(char *line, char *word)
 
 int define(char *line)
 {
-        char *lp = line;
+        char *lp = line + 1;
         char name[MAXWORD];
         char word[MAXWORD];
 
@@ -74,6 +113,9 @@ int define(char *line)
         lp = nextword(lp, name);
         if (!(isalpha(name[0]) || name[0] == '_'))
                 return 1;
+
+        while (*lp == ' ' && *lp != '\0')
+                lp++;
 
         nextword(lp, word);
         if (word[0] == '\0')
