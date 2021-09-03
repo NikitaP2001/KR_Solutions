@@ -29,7 +29,7 @@ int main()
         char line[MAXLINE];
         while (getline(line) >= 0) {
                 if (line[0] == '#') {
-                        //define(line);
+                        define(line);
                         puts(line);
                 }
 
@@ -67,8 +67,11 @@ int define(char *line)
         char name[MAXWORD];
         char word[MAXWORD];
 
-        lp = nextword(lp, name);
+        lp = nextword(lp, word);
+        if (strcmp(word, "define") != 0)
+                return 3;
 
+        lp = nextword(lp, name);
         if (!(isalpha(name[0]) || name[0] == '_'))
                 return 1;
 
