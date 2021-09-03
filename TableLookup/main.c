@@ -1,26 +1,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define HASHSIZE 101
-
-struct nlist {
-    struct nlist *next;
-    char *name;
-    char *defn;
-};
-
-static struct nlist *hashtab[HASHSIZE];
+#define MAXWORD 100
+#define MAXLINE 1000
 
 unsigned hash(char *s);
 struct nlist *lookup(char *s);
 struct nlist *install(char *name, char *defn);
 void undef(char *name);
+int define(char *line);
+
+char *nextword(char *line, char *word);
+int getline(char *line);
+
+struct nlist {
+        struct nlist *next;
+        char *name;
+        char *defn;
+};
+
+static struct nlist *hashtab[HASHSIZE];
 
 int main()
 {
-    printf("Hello world!\n");
-    return 0;
+        char line[MAXLINE];
+        while (getline(line) >= 0) {
+                if (line[0] == '#') {
+                        //define(line);
+                        puts(line);
+                }
+
+        }
+}
+
+int getline(char *line)
+{
+        char c;
+        int p = 0;;
+        while ((c = getchar()) >= 0 && c != '\n' && p < MAXLINE)
+                line[p++] = c;
+        line[p] = '\0';
+        return c;
+}
+
+char *nextword(char *line, char *word)
+{
+        int ipw = 0;
+        int ipl = 0;
+
+        while (line[ipl] == ' ' && line[ipl] != '\0')
+                ipl++;
+        char c = word[ipw++] = line[ipl++];
+        if (isalpha(c) || c == '_')
+                while ((isalpha(line[ipl]) || line[ipl] == '_') && ipw < MAXWORD)
+                        word[ipw++] = line[ipl++];
+        word[ipw] = '\0';
+        return line + ipl;
+}
+
+int define(char *line)
+{
+        char *lp = line;
+        char name[MAXWORD];
+        char word[MAXWORD];
+
+        lp = nextword(lp, name);
+
+        if (!(isalpha(name[0]) || name[0] == '_'))
+                return 1;
+
+        nextword(lp, word);
+        if (word[0] == '\0')
+                return 2;
+
+        install(name, lp);
+
+        return 0;
 }
 
 unsigned hash(char *s)
@@ -77,19 +135,6 @@ void undef(char *name)
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
