@@ -8,10 +8,11 @@
 
 void miniprintf(char *fmt, ...);
 int readnum(char **p);
+void printf_format(char *format, char control);
 
 int main()
 {
-    miniprintf("%11s decimal: %10d float: %15f hex: %20x\n", "This is", 1234, 1234.345, 54321);
+    miniprintf("%11s decimal: %-10d float: %15.5f hex: %20x\n", "This is", 1234, 1234.345, 54321);
     return 0;
 }
 
@@ -46,8 +47,16 @@ void miniprintf(char *fmt, ...)
                                 percent = 0;
                                 putchar(*p);
                         } else {
+                                if (*(p+1) == '-') {
+                                        opt.minus = 1;
+                                        p++;
+                                }
                                 if (isdigit(*(p+1)))
                                         opt.min_width = readnum(&p);
+                                if (*(p+1) == '.') {
+                                        p++;
+                                        opt.precision = readnum(&p);
+                                }
                                 percent = 1;
                         }
                         continue;
@@ -57,20 +66,14 @@ void miniprintf(char *fmt, ...)
                         case 'd':
                         case 'i':
                                 ival = va_arg(ap, int);
-                                if (opt.min_width != 0)
-                                        sprintf(format, "%%%dd", opt.min_width);
-                                else
-                                        strcpy(format, "%d");
+                                printf_format(format, 'd');
                                 printf(format, ival);
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
                                 break;
                         case 'o':
                                 ival = va_arg(ap, int);
-                                if (opt.min_width != 0)
-                                        sprintf(format, "%%%do", opt.min_width);
-                                else
-                                        strcpy(format, "%o");
+                                printf_format(format, 'o');
                                 printf(format, ival);
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
@@ -78,20 +81,14 @@ void miniprintf(char *fmt, ...)
                         case 'x':
                         case 'X':
                                 ival = va_arg(ap, int);
-                                if (opt.min_width != 0)
-                                        sprintf(format, "%%%dx", opt.min_width);
-                                else
-                                        strcpy(format, "%x");
+                                printf_format(format, 'x');
                                 printf(format, ival);
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
                                 break;
                         case 'f':
                                 dval = va_arg(ap, double);
-                                if (opt.min_width != 0)
-                                        sprintf(format, "%%%df", opt.min_width);
-                                else
-                                        strcpy(format, "%f");
+                                printf_format(format, 'f');
                                 printf(format, dval);
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
@@ -105,9 +102,6 @@ void miniprintf(char *fmt, ...)
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
                                 break;
-                        case '-':
-                                if (opt.minus)
-                                opt.minus = 1;
                         default:
                                 putchar(*p);
                                 break;
@@ -131,6 +125,28 @@ int readnum(char **p)
         return atoi(numbuf);
 }
 
+void printf_format(char *format, char control)
+{
+        char sztemp[100];
+        char szsym[2];
+        szsym[0] = control;
+        szsym[1] = '\0';
+        format[0] = '%';
+        format[1] = '\0';
+        if (opt.minus != 0) {
+                sprintf(sztemp, "%c", '-');
+                strcat(format, sztemp);
+        }
+        if (opt.min_width != 0) {
+                sprintf(sztemp, "%d", opt.min_width);
+                strcat(format, sztemp);
+        }
+        if (opt.precision != 0) {
+                sprintf(sztemp, ".%d", opt.precision);
+                strcat(format, sztemp);
+        }
+        strcat(format, szsym);
+}
 
 
 
