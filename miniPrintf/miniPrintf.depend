@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1630937027 source:e:\src\kr_solutions\miniprintf\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<string.h>
+	<ctype.h>
+
