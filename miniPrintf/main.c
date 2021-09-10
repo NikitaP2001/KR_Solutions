@@ -93,7 +93,7 @@ void miniprintf(char *fmt, ...)
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
                                 break;
-                        case 's':
+                        case 's': {
                                 int printed = 0;
                                 for (sval = va_arg(ap, char*); *sval; sval++, printed++)
                                         putchar(*sval);
@@ -102,6 +102,7 @@ void miniprintf(char *fmt, ...)
                                 memset(&opt, 0, sizeof(opt));
                                 percent = 0;
                                 break;
+                        }
                         default:
                                 putchar(*p);
                                 break;
