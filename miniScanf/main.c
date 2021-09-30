@@ -8,7 +8,7 @@ int miniscanf(char *target, const char *format, ...);
 int main()
 {
         char buf[100] = "Hi";
-        sprintf(buf, "%010d ", -123);
+        sprintf(buf, "%010.15hs ", "");
         puts(buf);
         return 0;
 }
@@ -26,6 +26,31 @@ struct sprintf_flags {
         unsigned int long_double        :1;
 
 };
+
+/*
+In debugging purposes */
+static void dump_flags(struct sprintf_flags *flg) {
+        if (flg->left_justify)
+                puts("flag left justify: -");
+        if (flg->sign_precedate)
+                puts("flag sign precedate: +");
+        if (flg->no_sign_blank)
+                puts("flag not sign blank: (space)");
+        if (flg->type_presidence)
+                puts("flag type presidence: #");
+        if (flg->zero_left_pad)
+                puts("flag zero left pad: 0");
+        if (flg->width != 0)
+                printf("width:%d\n", flg->width);
+        if (flg->precision != 0)
+                printf("width:%d\n", flg->precision);
+        if (flg->short_int)
+                puts("short int: h");
+        if (flg->long_int)
+                puts("long int: l");
+        if (flg->long_double)
+                puts("long double: L");
+}
 
 int miniscanf(char *target, const char *format, ...)
 {
@@ -78,7 +103,22 @@ int miniscanf(char *target, const char *format, ...)
                 }
 
                 if (step == 4) {
+                        step = 5;
+                        switch (format[i]) {
+                        case 'h':
+                                flags.short_int = 1;
+                                continue;
+                        case 'L':
+                                flags.long_double = 1;
+                                continue;
+                        case 'l':
+                                flags.long_int = 1;
+                                continue;
+                        }
+                }
 
+                if (step == 5) {
+                        dump_flags(&flags);
                 }
 
                 if (format[i] == '%') {
