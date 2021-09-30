@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1633002764 source:e:\src\kr_solutions\miniscanf\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdarg.h>
+	<string.h>
+
