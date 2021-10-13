@@ -8,7 +8,7 @@ int miniscanf(char *target, const char *format, ...);
 int main()
 {
         char buf[100] = "Hi";
-        sprintf(buf, "%010.15hs ", "");
+        miniscanf(buf, "%010.15hs ", "");
         puts(buf);
         return 0;
 }
