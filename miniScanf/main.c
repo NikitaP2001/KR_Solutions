@@ -8,7 +8,11 @@ int miniscanf(const char *format, ...);
 int main()
 {
         char buf[100] = {};
-        miniscanf("%10hs ", buf);
+        miniscanf("%10hs %10lld %10hhd", buf);
+        miniscanf("%10jd", buf);
+        miniscanf("%10Lu", buf);
+        miniscanf("%10zu", buf);
+        miniscanf("%*20hd ", buf);
         puts(buf);
         return 0;
 }
@@ -52,6 +56,51 @@ static void dump_flags(struct sprintf_flags *flg) {
 
 }
 
+static int __miniscanf_read(char specifier, struct sprintf_flags flags, va_list vl)
+{
+	switch (specifier) {
+	case 'i':
+	case 'd':
+		if (flags.hh)
+			; // read signed char*
+		else if (flags.h)
+			; // read short int*
+		else if (flags.l)
+			; // read long int*
+		else if (flags.ll)
+			; // read long long int *
+		else if (flags.j)
+			; // read intmax_t*
+		else if (flags.z)
+			; // read size_t*
+		else if (flags.t)
+			; // read ptrdiff_t*
+		else 
+			return -1;
+		break;
+	case 'u':
+	case 'o':
+	case 'x':
+		break;
+	case 'f':
+	case 'e':
+	case 'g':
+	case 'a':
+		break;
+	case 'c':
+	case 's':
+		break;
+	case 'p':
+		break;
+	case 'n':
+		break;
+	default:
+		return -1;
+	}
+
+	return 1;
+}
+
 int miniscanf(const char *format, ...)
 {
         struct sprintf_flags flags = {};
@@ -61,51 +110,54 @@ int miniscanf(const char *format, ...)
 
         for (int i = 0, j = 0; format[i] != '\0' && !error; i++) {
 
-                //Read flags
+                // Read flags
                 if (step == 1) {
-			if (format[i] == '*')
-				flags.asterisk = 1;
 			step = 2;
-			continue;
+			if (format[i] == '*') {
+				flags.asterisk = 1;
+				continue;
+			}
 		}
 
-                //Read width
+                // Read width
                 if (step == 2) {
-                        if ('0' <= format[i] && format[i] <= '9')
+                        if ('0' <= format[i] && format[i] <= '9') {
                                 flags.width = flags.width * 10 + format[i] - '0';
-                        else 
+				continue;
+			} else 
                                 step = 3;
-			continue;
                 }
 
+		// Read begin of length field
                 if (step == 3) {
 			step = 5;
 			switch (format[i]) {
 			case 'h':
 				flags.h = 1;
 				step = 4;
-				break;
+				continue;
 			case 'l':
 				flags.l = 1;
 				step = 4;
-				break;
+				continue;
 			case 'j':
 				flags.j = 1;
-				break;
+				continue;
 			case 'z':
 				flags.z = 1;
-				break;
+				continue;
 			case 't':
 				flags.t = 1;
-				break;
+				continue;
 			case 'L':
 				flags.L = 1;
-				break;
+				continue;
 			}
-			continue;
 		}
 
+		// Read end of length field
                 if (step == 4) {
+                        step = 5;
                         switch (format[i]) {
                         case 'h':
 				if (flags.h == 1) {
@@ -113,21 +165,21 @@ int miniscanf(const char *format, ...)
                                 	flags.h = 0;
 				} else 
 					error = 1;
-				break;
+				continue;
                         case 'l':
 				if (flags.l == 1) {
                                 	flags.ll = 1;
                                 	flags.l = 0;
 				} else 
 					error = 1;
-				break;
+				continue;
                         }
-                        step = 5;
-			continue;
                 }
 
                 if (step == 5) {
-                        dump_flags(&flags);
+			readed = __miniscanf_read(format[i], flags, vl);
+			if (readed < 0)
+				error = 1;
 			step = 6;
 			continue;
                 }
