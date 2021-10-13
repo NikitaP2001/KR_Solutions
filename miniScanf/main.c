@@ -3,122 +3,133 @@
 #include <stdarg.h>
 #include <string.h>
 
-int miniscanf(char *target, const char *format, ...);
+int miniscanf(const char *format, ...);
 
 int main()
 {
-        char buf[100] = "Hi";
-        miniscanf(buf, "%010.15hs ", "");
+        char buf[100] = {};
+        miniscanf("%10hs ", buf);
         puts(buf);
         return 0;
 }
 
 struct sprintf_flags {
         unsigned int width;
-        unsigned int precision;
-        unsigned int left_justify       :1;
-        unsigned int sign_precedate     :1;
-        unsigned int no_sign_blank      :1;
-        unsigned int type_presidence    :1;
-        unsigned int zero_left_pad      :1;
-        unsigned int short_int          :1;
-        unsigned int long_int           :1;
-        unsigned int long_double        :1;
-
+	unsigned int asterisk	:1;
+        unsigned int hh			:1;
+        unsigned int h			:1;
+        unsigned int l			:1;
+        unsigned int ll			:1;
+        unsigned int j      		:1;
+        unsigned int z			:1;
+        unsigned int t			:1;
+        unsigned int L			:1;
 };
 
 /*
 In debugging purposes */
 static void dump_flags(struct sprintf_flags *flg) {
-        if (flg->left_justify)
-                puts("flag left justify: -");
-        if (flg->sign_precedate)
-                puts("flag sign precedate: +");
-        if (flg->no_sign_blank)
-                puts("flag not sign blank: (space)");
-        if (flg->type_presidence)
-                puts("flag type presidence: #");
-        if (flg->zero_left_pad)
-                puts("flag zero left pad: 0");
-        if (flg->width != 0)
-                printf("width:%d\n", flg->width);
-        if (flg->precision != 0)
-                printf("width:%d\n", flg->precision);
-        if (flg->short_int)
-                puts("short int: h");
-        if (flg->long_int)
-                puts("long int: l");
-        if (flg->long_double)
-                puts("long double: L");
+        if (flg->asterisk)
+                puts("flag asterisk: *");
+	if (flg->width)
+		printf("width: %d\n", flg->width);
+        if (flg->hh)
+                puts("length : hh");
+        if (flg->h)
+                puts("length : h");
+        if (flg->l)
+                puts("length: l");
+	if (flg->ll)
+                puts("length: ll");
+	if (flg->j)
+                puts("length: jj");
+	if (flg->z)
+                puts("length: z");
+	if (flg->t)
+                puts("length: t");
+	if (flg->L)
+                puts("length: L");
+
 }
 
-int miniscanf(char *target, const char *format, ...)
+int miniscanf(const char *format, ...)
 {
         struct sprintf_flags flags = {};
-        int step = 0, error = 0;
+        int step = 0, error = 0, readed = 0;
         va_list vl;
         va_start(vl, format);
-        target[0] = '\0';
 
         for (int i = 0, j = 0; format[i] != '\0' && !error; i++) {
 
                 //Read flags
-                if (step == 1)
-                        switch (format[i]) {
-                        case '-':
-                                flags.left_justify = 1;
-                                break;
-                        case '+':
-                                flags.sign_precedate = 1;
-                                break;
-                        case ' ':
-                                flags.no_sign_blank = 1;
-                                break;
-                        case '#':
-                                flags.type_presidence = 1;
-                                break;
-                        case '0':
-                                flags.zero_left_pad = 1;
-                                break;
-                        default:
-                                step = 2;
-                                break;
-                        }
+                if (step == 1) {
+			if (format[i] == '*')
+				flags.asterisk = 1;
+			step = 2;
+			continue;
+		}
 
                 //Read width
                 if (step == 2) {
                         if ('0' <= format[i] && format[i] <= '9')
                                 flags.width = flags.width * 10 + format[i] - '0';
-                        else if (format[i] == '.')
+                        else 
                                 step = 3;
-                        else
-                                step = 4;
+			continue;
                 }
 
                 if (step == 3) {
-                        if ('0' <= format[i] && format[i] <= '9')
-                                flags.precision = flags.precision * 10 + format[i] - '0';
-                        else
-                                step = 4;
-                }
+			step = 5;
+			switch (format[i]) {
+			case 'h':
+				flags.h = 1;
+				step = 4;
+				break;
+			case 'l':
+				flags.l = 1;
+				step = 4;
+				break;
+			case 'j':
+				flags.j = 1;
+				break;
+			case 'z':
+				flags.z = 1;
+				break;
+			case 't':
+				flags.t = 1;
+				break;
+			case 'L':
+				flags.L = 1;
+				break;
+			}
+			continue;
+		}
 
                 if (step == 4) {
-                        step = 5;
                         switch (format[i]) {
                         case 'h':
-                                flags.short_int = 1;
-                                continue;
-                        case 'L':
-                                flags.long_double = 1;
-                                continue;
+				if (flags.h == 1) {
+                                	flags.hh = 1;
+                                	flags.h = 0;
+				} else 
+					error = 1;
+				break;
                         case 'l':
-                                flags.long_int = 1;
-                                continue;
+				if (flags.l == 1) {
+                                	flags.ll = 1;
+                                	flags.l = 0;
+				} else 
+					error = 1;
+				break;
                         }
+                        step = 5;
+			continue;
                 }
 
                 if (step == 5) {
                         dump_flags(&flags);
+			step = 6;
+			continue;
                 }
 
                 if (format[i] == '%') {
@@ -128,7 +139,7 @@ int miniscanf(char *target, const char *format, ...)
         }
 
         va_end(vl);
-        return strlen(target);
+        return readed;
 }
 
 
