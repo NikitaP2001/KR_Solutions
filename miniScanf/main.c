@@ -2,18 +2,18 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdint.h>
 
 int miniscanf(const char *format, ...);
 
 int main()
 {
         char buf[100] = {};
-        miniscanf("%10hs %10lld %10hhd", buf);
-        miniscanf("%10jd", buf);
-        miniscanf("%10Lu", buf);
-        miniscanf("%10zu", buf);
-        miniscanf("%*20hd ", buf);
-        puts(buf);
+	long long int a;
+	short int b;
+        miniscanf("%10s %10lld %10hd", buf, &a, &b);
+	printf("%s, %lld, %hd", buf, a, b);
         return 0;
 }
 
@@ -58,47 +58,168 @@ static void dump_flags(struct sprintf_flags *flg) {
 
 static int __miniscanf_read(char specifier, struct sprintf_flags flags, va_list vl)
 {
+	char buffer[10];
+	char *format;
+	if (flags.asterisk)
+		format = "*%s";
+	else
+		format = "%s";
+
 	switch (specifier) {
 	case 'i':
 	case 'd':
-		if (flags.hh)
-			; // read signed char*
-		else if (flags.h)
-			; // read short int*
-		else if (flags.l)
-			; // read long int*
-		else if (flags.ll)
-			; // read long long int *
-		else if (flags.j)
-			; // read intmax_t*
-		else if (flags.z)
-			; // read size_t*
-		else if (flags.t)
-			; // read ptrdiff_t*
-		else 
-			return -1;
+		if (flags.hh) {
+			signed char *cptr = va_arg(vl, signed char*);
+			sprintf(buffer, format, "%hhd");
+			return scanf(buffer, cptr);
+		} else if (flags.h) {
+			short int *hptr = va_arg(vl, short int*);
+			sprintf(buffer, format, "%hd");
+			return scanf(buffer, hptr);
+		} else if (flags.l) {
+			long int *lptr = va_arg(vl, long int*);
+			sprintf(buffer, format, "%ld");
+			return scanf(buffer, lptr);
+		} else if (flags.ll) {
+			long long int *llptr = va_arg(vl, long long int*);
+			sprintf(buffer, format, "%lld");
+			return scanf(buffer,llptr);
+		} else if (flags.j) {
+			intmax_t *jptr = va_arg(vl, intmax_t*);
+			sprintf(buffer, format, "%jd");
+			return scanf(buffer, jptr);
+		} else if (flags.z) {
+			size_t *zptr = va_arg(vl, size_t*);
+			sprintf(buffer, format, "%zd");
+			return scanf(buffer, zptr);
+		} else if (flags.t) {
+			ptrdiff_t *dptr = va_arg(vl, ptrdiff_t*);
+			sprintf(buffer, format, "%td");
+			return scanf(buffer, dptr);
+		} else {
+			int *iptr = va_arg(vl, int*);
+			sprintf(buffer, format, "%d");
+			return scanf(buffer, iptr);	
+		}
 		break;
 	case 'u':
 	case 'o':
 	case 'x':
+		if (flags.hh) {
+			unsigned char *cptr = va_arg(vl, unsigned char*);
+			sprintf(buffer, format, "%hhu");
+			return scanf(buffer, cptr);
+		} else if (flags.h) {
+			unsigned short int *hptr = va_arg(vl, unsigned short int*);
+			sprintf(buffer, format, "%hu");
+			return scanf(buffer, hptr);
+		} else if (flags.l) {
+			unsigned long int *lptr = va_arg(vl, unsigned long int*);
+			sprintf(buffer, format, "%lu");
+			return scanf(buffer, lptr);
+		} else if (flags.ll) {
+			unsigned long long int *llptr = va_arg(vl, unsigned long long int*);
+			sprintf(buffer, format, "%llu");
+			return scanf(buffer,llptr);
+		} else if (flags.j) {
+			uintmax_t *jptr = va_arg(vl, uintmax_t*);
+			sprintf(buffer, format, "%ju");
+			return scanf(buffer, jptr);
+		} else if (flags.z) {
+			size_t *zptr = va_arg(vl, size_t*);
+			sprintf(buffer, format, "%zu");
+			return scanf(buffer, zptr);
+		} else if (flags.t) {
+			ptrdiff_t *dptr = va_arg(vl, ptrdiff_t*);
+			sprintf(buffer, format, "%td");
+			return scanf(buffer, dptr);
+		} else {
+			unsigned int *iptr = va_arg(vl, unsigned int*);
+			sprintf(buffer, format, "%u");
+			return scanf(buffer, iptr);	
+		}
 		break;
 	case 'f':
 	case 'e':
 	case 'g':
 	case 'a':
+		if (flags.l) {
+			double *dptr = va_arg(vl, double*);
+			sprintf(buffer, format, "%lf");
+			return scanf(buffer, dptr);
+		} else {
+			float *fptr = va_arg(vl, float*);
+			sprintf(buffer, format, "%f");
+			return scanf(buffer, fptr);
+		}
 		break;
 	case 'c':
+		if (flags.l) {
+			char *cptr = va_arg(vl, char*);
+			sprintf(buffer, format, "%lc");
+			return scanf(buffer, cptr);
+
+		} else {
+			wchar_t *wptr = va_arg(vl, wchar_t*);
+			sprintf(buffer, format, "%c");
+			return scanf(buffer, wptr);
+		}
+		break;
 	case 's':
+		if (flags.l) {
+			wchar_t *wptr = va_arg(vl, wchar_t*);
+			sprintf(buffer, format, "%ls");
+			return scanf(buffer, wptr);
+
+		} else {
+			char *cptr = va_arg(vl, char*);
+			sprintf(buffer, format, "%s");
+			return scanf(buffer, cptr);
+		}
 		break;
 	case 'p':
+		void **pptr = va_arg(vl, void**);
+			sprintf(buffer, format, "%p");
+		return scanf(buffer, pptr);
 		break;
 	case 'n':
+		if (flags.hh) {
+			signed char *cptr = va_arg(vl, signed char*);
+			sprintf(buffer, format, "%hhn");
+			return scanf(buffer, cptr);
+		} else if (flags.h) {
+			short int *hptr = va_arg(vl, short int*);
+			sprintf(buffer, format, "%hn");
+			return scanf(buffer, hptr);
+		} else if (flags.l) {
+			long int *lptr = va_arg(vl, long int*);
+			sprintf(buffer, format, "%ln");
+			return scanf(buffer, lptr);
+		} else if (flags.ll) {
+			long long int *llptr = va_arg(vl, long long int*);
+			sprintf(buffer, format, "%lln");
+			return scanf(buffer,llptr);
+		} else if (flags.j) {
+			intmax_t *jptr = va_arg(vl, intmax_t*);
+			sprintf(buffer, format, "%jn");
+			return scanf(buffer, jptr);
+		} else if (flags.z) {
+			size_t *zptr = va_arg(vl, size_t*);
+			sprintf(buffer, format, "%zn");
+			return scanf(buffer, zptr);
+		} else if (flags.t) {
+			ptrdiff_t *dptr = va_arg(vl, ptrdiff_t*);
+			sprintf(buffer, format, "%tn");
+			return scanf(buffer, dptr);
+		} else {
+			int *iptr = va_arg(vl, int*);
+			sprintf(buffer, format, "%n");
+			return scanf(buffer, iptr);	
+		}
 		break;
-	default:
-		return -1;
 	}
 
-	return 1;
+	return 0;
 }
 
 int miniscanf(const char *format, ...)
@@ -177,7 +298,8 @@ int miniscanf(const char *format, ...)
                 }
 
                 if (step == 5) {
-			readed = __miniscanf_read(format[i], flags, vl);
+			readed += __miniscanf_read(format[i], flags, vl);
+			va_arg(vl, void*);
 			if (readed < 0)
 				error = 1;
 			step = 6;
@@ -187,7 +309,12 @@ int miniscanf(const char *format, ...)
                 if (format[i] == '%') {
                         step = 1;
                         memset(&flags, 0, sizeof(flags));
-                }
+                } else {
+			if (format[i] != getchar())
+				error = 1;
+			else
+				readed++;
+		}
         }
 
         va_end(vl);
