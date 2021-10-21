@@ -37,3 +37,6 @@ int _flushbuf(int, FILE *);
 
 FILE *fopen(const char *name, const char *mode);
 
+int fflush(FILE *stream);
+int fclose(FILE *stream);
+
