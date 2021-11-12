@@ -1,4 +1,3 @@
-#define NULL	0
 #define EOF	-1
 #define BUFSIZ	1024
 #define OPEN_MAX 20
@@ -28,7 +27,7 @@ int _flushbuf(int, FILE *);
 #define stderr (&_iob[2])
 
 #define getc(p) (--(p)->cnt >= 0 \
-		? (unsigned char) *(p)->ptr++ : _fillbuf(p))
+		? (unsigned char) *p->ptr++ : _fillbuf(p))
 #define putc(x,p) (--(p)->cnt >= 0 \
 		? *(p)->ptr++ = (x) : _flushbuf((x),p))
 
@@ -37,6 +36,11 @@ int _flushbuf(int, FILE *);
 
 FILE *fopen(const char *name, const char *mode);
 
-int fflush(FILE *stream);
+void fflush(FILE *stream);
 int fclose(FILE *stream);
 
+#define SEEK_SET 0
+#define SEEK_CUR 1	
+#define SEEK_END 2
+
+int fseek(FILE *fp, long offset, int origin);

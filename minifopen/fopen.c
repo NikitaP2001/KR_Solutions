@@ -119,7 +119,7 @@ int _flushbuf(int sym, FILE *fp)
 	return (unsigned char) *fp->ptr;
 }
 
-int fflush(FILE *stream)
+void fflush(FILE *stream)
 {
 	_flushbuf(0, stream);
 }
@@ -134,4 +134,14 @@ int fclose(FILE *stream)
 	if (CloseHandle(hFile) == 0)
 		return EOF;
 	return 0;
+}
+
+int fseek(FILE *fp, long offset, int origin)
+{
+        if (fp->_read)
+                fp->cnt = 0;
+        
+        DWORD dwResult = SetFilePointer(fp->fd, offset, NULL, origin);            
+        
+        return dwResult;
 }
