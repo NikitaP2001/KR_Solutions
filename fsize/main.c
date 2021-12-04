@@ -5,6 +5,29 @@
 
 #define MAX_NAME 100
 
+void fsize(char *filename);
+
+WIN32_FIND_DATAA fdata;
+
+/* Print info about all subdirs of specified dir
+ *      @path - full directory path
+ */
+static void dirwalk(char *path) {
+        char *SubdirPath = malloc(strlen(path));
+        sprintf(SubdirPath, "%s\\*", path);
+        HANDLE hFind = FindFirstFileA(SubdirPath, &fdata);
+        if (hFind == NULL)        
+                return;        
+        
+        // skip .. file
+        FindNextFileA(hFind, &fdata);
+        
+        while (FindNextFileA(hFind, &fdata))
+                fsize(fdata.cFileName);
+        
+        FindClose(hFind);
+}
+
 int header_already_printed = 0;
 static void printf_file_information(LPBY_HANDLE_FILE_INFORMATION finfo, HANDLE hFile)
 {
@@ -73,6 +96,30 @@ static void printf_file_information(LPBY_HANDLE_FILE_INFORMATION finfo, HANDLE h
         puts(ptrName);
 }
 
+void fsize(char *filename)
+{       
+        HANDLE hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 
+         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+        if (hFile == INVALID_HANDLE_VALUE) {
+                printf("Error opening file %s\n", filename);
+                return 1;
+        }
+        
+        BY_HANDLE_FILE_INFORMATION fileinfo;
+        BOOL result =  GetFileInformationByHandle(hFile, &fileinfo);          
+        if (result == FALSE) {
+                printf("Unable to access file infotmation\n");
+                return 1;
+        }
+        
+        if (fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                dirwalk(filename);
+        else
+                printf_file_information(&fileinfo, hFile);
+        
+        CloseHandle(hFile);
+}
+
 int main(int argc, char *argv[])
 {
         if (argc <= 1) {
@@ -80,19 +127,5 @@ int main(int argc, char *argv[])
                 return 1;
         }
         
-        HANDLE hFile = CreateFile(argv[1], GENERIC_READ, FILE_SHARE_READ, 
-         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL|FILE_FLAG_BACKUP_SEMANTICS, NULL);
-        if (hFile == INVALID_HANDLE_VALUE) {
-                printf("Error opening file %s", argv[1]);
-                return 1;
-        }
-        
-        BY_HANDLE_FILE_INFORMATION fileinfo;
-        BOOL result =  GetFileInformationByHandle(hFile, &fileinfo);          
-        if (result == FALSE) {
-                printf("Unable to access file infotmation");
-                return 1;
-        }
-        
-        printf_file_information(&fileinfo, hFile);
+        fsize(argv[1]);
 }
