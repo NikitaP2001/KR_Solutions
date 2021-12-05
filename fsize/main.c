@@ -5,7 +5,7 @@
 
 #define MAX_NAME 100
 
-void fsize(char *filename);
+int fsize(char *filename, char *filepath);
 
 WIN32_FIND_DATAA fdata;
 
@@ -13,18 +13,21 @@ WIN32_FIND_DATAA fdata;
  *      @path - full directory path
  */
 static void dirwalk(char *path) {
-        char *SubdirPath = malloc(strlen(path));
+        char *SubdirPath = malloc(strlen(path) + 6);
         sprintf(SubdirPath, "%s\\*", path);
         HANDLE hFind = FindFirstFileA(SubdirPath, &fdata);
+        SubdirPath[strlen(SubdirPath) - 1] = 0;
         if (hFind == NULL)        
                 return;        
         
         // skip .. file
-        FindNextFileA(hFind, &fdata);
+        if (SubdirPath[0] != '\\' && SubdirPath[1] != ':')
+                FindNextFileA(hFind, &fdata);
         
         while (FindNextFileA(hFind, &fdata))
-                fsize(fdata.cFileName);
+                fsize(fdata.cFileName, SubdirPath);
         
+        free(SubdirPath);
         FindClose(hFind);
 }
 
@@ -96,9 +99,13 @@ static void printf_file_information(LPBY_HANDLE_FILE_INFORMATION finfo, HANDLE h
         puts(ptrName);
 }
 
-void fsize(char *filename)
+int fsize(char *filename, char *filepath)
 {       
-        HANDLE hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 
+        char *fullName = malloc(strlen(filename) + strlen(filepath) + 1);
+        strcpy(fullName, filepath);
+        strcat(fullName, filename);
+        
+        HANDLE hFile = CreateFile(fullName, GENERIC_READ, FILE_SHARE_READ, 
          NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL|FILE_FLAG_BACKUP_SEMANTICS, NULL);
         if (hFile == INVALID_HANDLE_VALUE) {
                 printf("Error opening file %s\n", filename);
@@ -113,11 +120,13 @@ void fsize(char *filename)
         }
         
         if (fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-                dirwalk(filename);
+                dirwalk(fullName);
         else
                 printf_file_information(&fileinfo, hFile);
         
         CloseHandle(hFile);
+        free(fullName);
+        return 0;
 }
 
 int main(int argc, char *argv[])
@@ -125,7 +134,9 @@ int main(int argc, char *argv[])
         if (argc <= 1) {
                 puts("Specify at least one parameter");
                 return 1;
-        }
+        }     
         
-        fsize(argv[1]);
+        char c = 0;        
+        fsize(&c ,argv[1]);        
+                       
 }
