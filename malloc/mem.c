@@ -36,6 +36,12 @@ void *_malloc(unsigned nbytes)
         
 }
 
+void *_calloc(unsigned nmemb, size_t size)
+{
+        malloc(nmemb * size);
+        memset()
+}
+
 #define NALLOC 1024
 
 static Header *morecore(unsigned nu)
